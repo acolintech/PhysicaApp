@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhysicaApp: Ecosistema de Aprendizaje Interactivo - Para ZoZo, mi hermosa hija talentosa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .domain-map-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .node {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .node-completed {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            border-width: 2px;
+        }
+        .xp-bar-inner {
+            transition: width 0.5s ease-in-out;
+        }
+        .tab-button.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Main Container -->
+    <div id="app" class="min-h-screen p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Header -->
+            <header class="flex flex-wrap justify-between items-center mb-8 gap-4">
+                <h1 class="text-3xl font-bold text-blue-600">Physica<span class="text-gray-700">App -  Para: ZoZo, ¡mi hermosa hija talentosa!, en su camino al sueño de Japón </br> ¡Los sueños se cumplen!</span></h1>
+                <div id="user-profile" class="flex items-center space-x-4 bg-white p-2 rounded-full shadow-sm">
+                    <div class="text-right">
+                        <p class="font-semibold text-sm" id="user-level">Aprendiz Newtoniano</p>
+                        <div class="w-24 bg-gray-200 rounded-full h-2.5 mt-1">
+                            <div id="xp-bar" class="bg-blue-500 h-2.5 rounded-full" style="width: 10%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500"><span id="user-xp">10</span>/100 XP</p>
+                    </div>
+                    <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=🧑‍🔬" alt="User Avatar" class="w-10 h-10 rounded-full">
+                </div>
+            </header>
+
+            <!-- Domain Map View -->
+            <main id="domain-map-view">
+                <h2 class="text-2xl font-semibold mb-2">Mapa de Dominio</h2>
+                <p class="text-gray-600 mb-6">Explora el universo de la física. Completa un tema para iluminarlo y ganar XP.</p>
+
+                <div class="domain-map-grid">
+                    <!-- Unit 1 -->
+                    <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="mechanics" data-title="Fundamentos de la Mecánica">
+                        <h3 class="font-bold text-lg mb-2">Unidad 1: Fundamentos de la Mecánica</h3>
+                        <p class="text-sm text-gray-600">Fuerzas, movimiento y energía que gobiernan nuestro mundo.</p>
+                    </div>
+                    <!-- Unit 2 -->
+                    <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="rotation" data-title="Movimiento Rotacional y Gravitación">
+                        <h3 class="font-bold text-lg mb-2">Unidad 2: Movimiento Rotacional</h3>
+                        <p class="text-sm text-gray-600">El giro de los planetas y las ruedas.</p>
+                    </div>
+                    <!-- Unit 3 -->
+                    <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="waves" data-title="Ondas y Sonido">
+                        <h3 class="font-bold text-lg mb-2">Unidad 3: Ondas y Sonido</h3>
+                        <p class="text-sm text-gray-600">Las vibraciones que nos permiten ver y escuchar.</p>
+                    </div>
+                    <!-- Unit 4 -->
+                    <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="thermo" data-title="Termodinámica">
+                        <h3 class="font-bold text-lg mb-2">Unidad 4: Termodinámica</h3>
+                        <p class="text-sm text-gray-600">El estudio del calor, la energía y el desorden.</p>
+                    </div>
+                    <!-- Unit 5 -->
+                     <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="electrostatics" data-title="Electrostática y Circuitos CD">
+                        <h3 class="font-bold text-lg mb-2">Unidad 5: Electrostática y Circuitos</h3>
+                        <p class="text-sm text-gray-600">Cargas, campos eléctricos y circuitos básicos.</p>
+                    </div>
+                    <!-- Unit 6 -->
+                     <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="magnetism" data-title="Magnetismo e Inducción">
+                        <h3 class="font-bold text-lg mb-2">Unidad 6: Magnetismo e Inducción</h3>
+                        <p class="text-sm text-gray-600">Fuerzas magnéticas, inducción y corriente alterna.</p>
+                    </div>
+                    <!-- Unit 7 -->
+                     <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="optics" data-title="Óptica">
+                        <h3 class="font-bold text-lg mb-2">Unidad 7: Óptica</h3>
+                        <p class="text-sm text-gray-600">La naturaleza de la luz, reflexión y refracción.</p>
+                    </div>
+                     <div class="node bg-white p-6 rounded-lg shadow-md border-2 border-transparent" data-unit="" data-title="By">
+                        <h3 class="font-bold text-lg mb-2">Hecho en México por:</h3>
+                        <p class="text-sm text-gray-600">Acolintech</p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- AEA Module View (Hidden by default) -->
+            <section id="aea-module-view" class="hidden">
+                <button id="back-to-map" class="mb-6 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 transition">← Volver al Mapa</button>
+                <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+                    <div class="p-6 sm:p-8">
+                        <h2 id="aea-title" class="text-3xl font-bold mb-2"></h2>
+                        <p class="text-gray-600">Completa las tres fases para dominar este concepto.</p>
+                    </div>
+                    <!-- AEA Tabs -->
+                    <div class="border-b border-gray-200 px-6 sm:px-8">
+                        <nav class="-mb-px flex space-x-6 overflow-x-auto">
+                            <button class="tab-button py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-blue-600 hover:border-gray-300 transition whitespace-nowrap active" data-tab="learn">1. Aprender</button>
+                            <button class="tab-button py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-blue-600 hover:border-gray-300 transition whitespace-nowrap" data-tab="explore">2. Explorar</button>
+                            <button class="tab-button py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-blue-600 hover:border-gray-300 transition whitespace-nowrap" data-tab="apply">3. Aplicar</button>
+                        </nav>
+                    </div>
+
+                    <!-- AEA Content -->
+                    <div class="p-6 sm:p-8">
+                        <!-- Learn Content -->
+                        <div id="learn-content" class="tab-content space-y-4"></div>
+                        <!-- Explore Content -->
+                        <div id="explore-content" class="tab-content hidden"></div>
+                        <!-- Apply Content -->
+                        <div id="apply-content" class="tab-content hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Modal for "Eureka!" point -->
+    <div id="eureka-modal" class="modal-backdrop fixed inset-0 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-2xl p-8 text-center max-w-sm mx-auto transform transition-all scale-95 opacity-0">
+            <h3 class="text-2xl font-bold text-yellow-500 mb-4">¡EUREKA!</h3>
+            <p class="text-gray-700 mb-6">¡Has dominado completamente la unidad y ganado un Punto Eureka por tu excelente desempeño!</p>
+            <button id="close-modal" class="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition">Genial</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Content Database ---
+            const contentDB = {
+                mechanics: {
+                    learn: `
+                        <h3 class="text-2xl font-semibold">Microlección: Leyes de Newton</h3>
+                        <p>La primera ley de Newton, o ley de la inercia, establece que un objeto permanecerá en reposo o en movimiento rectilíneo uniforme a menos que una fuerza externa neta actúe sobre él.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold">Fórmula Clave: Segunda Ley de Newton</p>
+                            <p>La aceleración de un objeto es directamente proporcional a la fuerza neta que actúa sobre él e inversamente proporcional a su masa.</p>
+                            <div class="formula text-xl mt-2" data-formula="F_{neta} = m \\cdot a"></div>
+                        </div>
+                        <p>Esta relación es fundamental para entender cómo las fuerzas causan cambios en el movimiento. Un diagrama de cuerpo libre es una herramienta esencial para visualizar todas las fuerzas que actúan sobre un objeto.</p>
+                    `,
+                    explore: `
+                        <h3 class="text-2xl font-semibold mb-4">Simulación: Fuerzas y Movimiento</h3>
+                        <p class="mb-4">Manipula las variables para construir tu intuición física. ¿Qué pasa si duplicas la fuerza?</p>
+                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border">
+                            <iframe src="https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_es.html" allowfullscreen></iframe>
+                        </div>
+                    `,
+                    apply: [
+                        { q: "Si empujas una caja con una fuerza de 20 N y esta se acelera a 2 m/s², ¿cuál es su masa?", o: ["5 kg", "40 kg", "10 kg"], a: "c" },
+                        { q: "¿Qué principio establece que 'para cada acción, hay una reacción igual y opuesta'?", o: ["Tercera Ley de Newton", "Ley de la Inercia", "Ley de la Gravitación Universal"], a: "a" }
+                    ]
+                },
+                rotation: {
+                    learn: `
+                        <h3 class="text-2xl font-semibold">Microlección: Torque y Momento Angular</h3>
+                        <p>El torque es el análogo rotacional de la fuerza. Es una medida de cuán eficazmente una fuerza causa un cambio en el movimiento rotacional de un objeto.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold">Fórmula Clave: Torque</p>
+                            <p>El torque es el producto de la fuerza por el brazo de palanca (la distancia perpendicular desde el eje de rotación a la línea de acción de la fuerza).</p>
+                            <div class="formula text-xl mt-2" data-formula="\\tau = r \\times F"></div>
+                        </div>
+                        <p>El momento angular es una medida de la cantidad de rotación de un objeto y se conserva si el torque neto externo es cero.</p>
+                    `,
+                    explore: `
+                        <h3 class="text-2xl font-semibold mb-4">Simulación: Torque</h3>
+                        <p class="mb-4">Experimenta cómo diferentes fuerzas y distancias al eje de rotación afectan el equilibrio de una balanza.</p>
+                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border">
+                            <iframe src="https://phet.colorado.edu/sims/html/balancing-act/latest/balancing-act_es.html" allowfullscreen></iframe>
+                        </div>
+                    `,
+                    apply: [
+                        { q: "Si aplicas una fuerza de 10 N a 0.5 m del eje de rotación, ¿cuál es el torque?", o: ["5 N·m", "20 N·m", "2 N·m"], a: "a" },
+                        { q: "La conservación del momento angular explica por qué una patinadora sobre hielo gira más rápido cuando...", o: ["extiende sus brazos", "recoge sus brazos", "salta"], a: "b" }
+                    ]
+                },
+                waves: {
+                    learn: `
+                        <h3 class="text-2xl font-semibold">Microlección: Ondas y Sonido</h3>
+                        <p>Una onda es una perturbación que transfiere energía a través del espacio o un medio. Las propiedades clave incluyen amplitud, longitud de onda, frecuencia y período.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold">Fórmula Clave: Velocidad de la Onda</p>
+                            <p>La velocidad de una onda es el producto de su frecuencia y su longitud de onda.</p>
+                            <div class="formula text-xl mt-2" data-formula="v = f \\cdot \\lambda"></div>
+                        </div>
+                        <p>El sonido es una onda mecánica longitudinal que se propaga a través de un medio como el aire.</p>
+                    `,
+                    explore: `
+                        <h3 class="text-2xl font-semibold mb-4">Simulación: Onda en una Cuerda</h3>
+                        <p class="mb-4">Observa cómo cambiar la frecuencia y la amplitud afecta la forma y el movimiento de una onda.</p>
+                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border">
+                            <iframe src="https://phet.colorado.edu/sims/html/wave-on-a-string/latest/wave-on-a-string_es.html" allowfullscreen></iframe>
+                        </div>
+                    `,
+                    apply: [
+                        { q: "Si una onda tiene una frecuencia de 100 Hz y una longitud de onda de 2 m, ¿cuál es su velocidad?", o: ["50 m/s", "200 m/s", "0.02 m/s"], a: "b" },
+                        { q: "El efecto Doppler describe el cambio en la frecuencia de una onda en relación a un observador que se mueve. Si una ambulancia se acerca, el sonido parece...", o: ["más grave", "igual", "más agudo"], a: "c" }
+                    ]
+                },
+                thermo: {
+                    learn: `
+                        <h3 class="text-2xl font-semibold">Microlección: Leyes de la Termodinámica</h3>
+                        <p>La termodinámica es el estudio del calor, el trabajo y la energía. La Primera Ley es una declaración de la conservación de la energía.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold">Fórmula Clave: Primera Ley</p>
+                            <p>El cambio en la energía interna de un sistema es igual al calor añadido al sistema menos el trabajo realizado por el sistema.</p>
+                            <div class="formula text-xl mt-2" data-formula="\\Delta U = Q - W"></div>
+                        </div>
+                        <p>La Segunda Ley introduce el concepto de entropía y establece que el desorden total de un sistema aislado siempre tiende a aumentar con el tiempo.</p>
+                    `,
+                    explore: `
+                        <h3 class="text-2xl font-semibold mb-4">Simulación: Propiedades de los Gases</h3>
+                        <p class="mb-4">Bombea moléculas de gas en una caja y ve qué sucede a medida que cambias el volumen, la temperatura y la presión.</p>
+                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border">
+                            <iframe src="https://phet.colorado.edu/sims/html/gas-properties/latest/gas-properties_es.html" allowfullscreen></iframe>
+                        </div>
+                    `,
+                    apply: [
+                        { q: "El punto de ebullición del agua en la escala Kelvin es:", o: ["100 K", "273.15 K", "373.15 K"], a: "c" },
+                        { q: "Un proceso en el que no hay transferencia de calor se llama:", o: ["Isotérmico", "Isobárico", "Adiabático"], a: "c" }
+                    ]
+                },
+                electrostatics: {
+                    learn: `
+                        <h3 class="text-2xl font-semibold">Microlección: Ley de Ohm y Circuitos</h3>
+                        <p>La electrostática estudia las cargas eléctricas en reposo. La Ley de Coulomb describe la fuerza entre dos cargas.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold">Fórmula Clave: Ley de Ohm</p>
+                            <p>El voltaje a través de un resistor es directamente proporcional a la corriente que fluye a través de él.</p>
+                            <div class="formula text-xl mt-2" data-formula="V = I \\cdot R"></div>
+                        </div>
+                        <p>En los circuitos de corriente directa (CD), los componentes como resistores se pueden conectar en serie o en paralelo, siguiendo las Leyes de Kirchhoff.</p>
+                    `,
+                    explore: `
+                        <h3 class="text-2xl font-semibold mb-4">Simulación: Kit de Construcción de Circuitos CD</h3>
+                        <p class="mb-4">¡Construye tus propios circuitos! Conecta baterías, bombillas, resistores e interruptores para ver cómo fluye la electricidad.</p>
+                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border">
+                            <iframe src="https://phet.colorado.edu/sims/html/circuit-construction-kit-dc-virtual-lab/latest/circuit-construction-kit-dc-virtual-lab_es.html" allowfullscreen></iframe>
+                        </div>
+                    `,
+                    apply: [
+                        { q: "Si un circuito tiene una batería de 12 V y un resistor de 4 Ω, ¿cuál es la corriente?", o: ["3 A", "48 A", "0.33 A"], a: "a" },
+                        { q: "En una conexión en serie, la corriente total...", o: ["se divide entre los componentes", "es la misma a través de todos los componentes", "es la suma de las corrientes"], a: "b" }
+                    ]
+                },
+                magnetism: {
+                    learn: `
+                        <h3 class="text-2xl font-semibold">Microlección: Magnetismo e Inducción</h3>
+                        <p>El magnetismo es producido por cargas eléctricas en movimiento. La Fuerza de Lorentz describe la fuerza sobre una carga que se mueve en un campo magnético.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold">Fórmula Clave: Ley de Faraday de la Inducción</p>
+                            <p>Un cambio en el flujo magnético a través de una espira de alambre induce una fuerza electromotriz (voltaje).</p>
+                            <div class="formula text-xl mt-2" data-formula="\\mathcal{E} = -\\frac{d\\Phi_B}{dt}"></div>
+                        </div>
+                        <p>Este principio es la base de los generadores eléctricos, motores y transformadores.</p>
+                    `,
+                    explore: `
+                        <h3 class="text-2xl font-semibold mb-4">Simulación: Ley de Faraday</h3>
+                        <p class="mb-4">Mueve un imán cerca de una bobina para ver cómo se induce una corriente eléctrica. ¿Qué factores aumentan la corriente?</p>
+                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border">
+                            <iframe src="https://phet.colorado.edu/sims/html/faradays-law/latest/faradays-law_es.html" allowfullscreen></iframe>
+                        </div>
+                    `,
+                    apply: [
+                        { q: "La dirección de la fuerza magnética sobre una carga positiva en movimiento es...", o: ["paralela al campo magnético", "en la dirección del movimiento", "perpendicular tanto a la velocidad como al campo"], a: "c" },
+                        { q: "La Ley de Lenz establece que la corriente inducida fluye en una dirección que...", o: ["maximiza el cambio de flujo", "se opone al cambio de flujo que la causó", "es aleatoria"], a: "b" }
+                    ]
+                },
+                optics: {
+                    learn: `
+                        <h3 class="text-2xl font-semibold">Microlección: Refracción y Lentes</h3>
+                        <p>La óptica es el estudio de la luz. La refracción es el cambio de dirección de la luz cuando pasa de un medio a otro.</p>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="font-semibold">Fórmula Clave: Ley de Snell</p>
+                            <p>Relaciona los ángulos de incidencia y refracción con los índices de refracción de los dos medios.</p>
+                            <div class="formula text-xl mt-2" data-formula="n_1 \\sin(\\theta_1) = n_2 \\sin(\\theta_2)"></div>
+                        </div>
+                        <p>Las lentes (convergentes y divergentes) utilizan la refracción para formar imágenes, lo cual es el principio detrás de las gafas, los telescopios y los microscopios.</p>
+                    `,
+                    explore: `
+                        <h3 class="text-2xl font-semibold mb-4">Simulación: Refracción de la Luz</h3>
+                        <p class="mb-4">Dispara un láser y observa cómo se desvía al pasar por diferentes materiales como agua o vidrio. ¡Intenta encontrar el ángulo de reflexión interna total!</p>
+                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border">
+                            <iframe src="https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_es.html" allowfullscreen></iframe>
+                        </div>
+                    `,
+                    apply: [
+                        { q: "Cuando la luz pasa del aire al agua, se desvía...", o: ["hacia la normal", "alejándose de la normal", "no se desvía"], a: "a" },
+                        { q: "Una lente que es más gruesa en el centro y hace que los rayos de luz paralelos converjan en un punto se llama:", o: ["lente divergente", "espejo plano", "lente convergente"], a: "c" }
+                    ]
+                }
+            };
+
+            // --- State Management ---
+            const state = {
+                xp: 10,
+                level: 'Aprendiz Newtoniano',
+                xpToNextLevel: 100,
+                completedUnits: [],
+                currentUnit: null
+            };
+
+            // --- DOM Elements ---
+            const domainMapView = document.getElementById('domain-map-view');
+            const aeaModuleView = document.getElementById('aea-module-view');
+            const backToMapBtn = document.getElementById('back-to-map');
+            const nodes = document.querySelectorAll('.node');
+            const aeaTitle = document.getElementById('aea-title');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const learnContent = document.getElementById('learn-content');
+            const exploreContent = document.getElementById('explore-content');
+            const applyContent = document.getElementById('apply-content');
+            const eurekaModal = document.getElementById('eureka-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+
+            // --- UI Update Functions ---
+            function updateProfileUI() {
+                document.getElementById('user-xp').textContent = state.xp;
+                document.getElementById('user-level').textContent = state.level;
+                const xpPercentage = (state.xp / state.xpToNextLevel) * 100;
+                document.getElementById('xp-bar').style.width = `${xpPercentage}%`;
+            }
+
+            function updateDomainMapUI() {
+                nodes.forEach(node => {
+                    node.classList.toggle('node-completed', state.completedUnits.includes(node.dataset.unit));
+                });
+            }
+
+            // --- Navigation ---
+            function showDomainMap() {
+                aeaModuleView.classList.add('hidden');
+                domainMapView.classList.remove('hidden');
+                state.currentUnit = null;
+            }
+
+            function showAEAModule(unit, title) {
+                state.currentUnit = unit;
+                aeaTitle.textContent = title;
+                
+                const content = contentDB[unit];
+                if (!content) return;
+
+                // Load content dynamically
+                learnContent.innerHTML = content.learn;
+                exploreContent.innerHTML = content.explore;
+                renderQuiz(content.apply);
+                
+                // Render any LaTeX formulas
+                document.querySelectorAll('.formula').forEach(el => {
+                    katex.render(el.dataset.formula, el, { throwOnError: false });
+                });
+
+                domainMapView.classList.add('hidden');
+                aeaModuleView.classList.remove('hidden');
+                switchTab('learn');
+            }
+
+            // --- AEA Module Logic ---
+            function switchTab(targetTab) {
+                tabButtons.forEach(button => {
+                    button.classList.toggle('active', button.dataset.tab === targetTab);
+                });
+                learnContent.parentElement.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.toggle('hidden', content.id !== `${targetTab}-content`);
+                });
+            }
+
+            // --- Quiz Logic ---
+            function renderQuiz(questions) {
+                let quizHTML = `
+                    <h3 class="text-2xl font-semibold mb-4">Práctica: Resuelve los Problemas</h3>
+                    <div id="quiz-container" class="space-y-6">
+                `;
+                questions.forEach((q, index) => {
+                    quizHTML += `
+                        <div class="quiz-question" data-correct="${q.a}">
+                            <p class="font-semibold mb-2">${index + 1}. ${q.q}</p>
+                            <div class="space-y-2">
+                                ${q.o.map((option, i) => `
+                                    <label class="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition cursor-pointer">
+                                        <input type="radio" name="q${index}" value="${String.fromCharCode(97 + i)}" class="mr-3"> ${option}
+                                    </label>
+                                `).join('')}
+                            </div>
+                            <p class="feedback text-sm mt-2 hidden"></p>
+                        </div>
+                    `;
+                });
+                quizHTML += `
+                        <button id="submit-quiz" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">Evaluar Respuestas</button>
+                    </div>
+                    <div id="quiz-results" class="hidden mt-6">
+                        <h4 class="font-bold">Resultados:</h4>
+                        <p id="results-text"></p>
+                        <button id="complete-unit" class="hidden mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">¡Dominado! Volver al Mapa (+50 XP)</button>
+                    </div>
+                `;
+                applyContent.innerHTML = quizHTML;
+                document.getElementById('submit-quiz').addEventListener('click', submitQuiz);
+            }
+
+            function submitQuiz() {
+                const questions = document.querySelectorAll('.quiz-question');
+                let score = 0;
+                let allAnswered = true;
+
+                questions.forEach(q => {
+                    const selected = q.querySelector('input:checked');
+                    const feedbackEl = q.querySelector('.feedback');
+                    feedbackEl.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-yellow-600');
+
+                    if (!selected) {
+                        feedbackEl.textContent = 'Por favor, selecciona una respuesta.';
+                        feedbackEl.classList.add('text-yellow-600');
+                        allAnswered = false;
+                        return;
+                    }
+
+                    if (selected.value === q.dataset.correct) {
+                        score++;
+                        feedbackEl.textContent = '¡Correcto!';
+                        feedbackEl.classList.add('text-green-600');
+                    } else {
+                        feedbackEl.textContent = `Incorrecto. La respuesta correcta era la opción ${q.dataset.correct.toUpperCase()}.`;
+                        feedbackEl.classList.add('text-red-600');
+                    }
+                });
+                
+                if (!allAnswered) return;
+
+                const quizResults = document.getElementById('quiz-results');
+                document.getElementById('results-text').textContent = `Obtuviste ${score} de ${questions.length} respuestas correctas.`;
+                quizResults.classList.remove('hidden');
+                document.getElementById('submit-quiz').classList.add('hidden');
+
+                const completeUnitBtn = document.getElementById('complete-unit');
+                const existingRetryBtn = quizResults.querySelector('.retry-btn');
+                if (existingRetryBtn) existingRetryBtn.remove();
+
+                if (score === questions.length) {
+                    completeUnitBtn.classList.remove('hidden');
+                    completeUnitBtn.onclick = completeCurrentUnit;
+                } else {
+                    completeUnitBtn.classList.add('hidden');
+                    const retryBtn = document.createElement('button');
+                    retryBtn.textContent = 'Intentar de Nuevo';
+                    retryBtn.className = 'retry-btn mt-4 bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition';
+                    retryBtn.onclick = () => renderQuiz(contentDB[state.currentUnit].apply);
+                    quizResults.appendChild(retryBtn);
+                }
+            }
+            
+            // --- Gamification ---
+            function addXP(amount) {
+                state.xp += amount;
+                if (state.xp >= state.xpToNextLevel) {
+                    state.level = 'Físico Intermedio';
+                    state.xp -= state.xpToNextLevel;
+                    state.xpToNextLevel *= 2;
+                }
+                updateProfileUI();
+            }
+
+            function completeCurrentUnit() {
+                if (state.currentUnit && !state.completedUnits.includes(state.currentUnit)) {
+                    state.completedUnits.push(state.currentUnit);
+                    addXP(50);
+                    updateDomainMapUI();
+                    showEurekaModal();
+                }
+                setTimeout(showDomainMap, 500);
+            }
+
+            function showEurekaModal() {
+                eurekaModal.classList.remove('hidden');
+                setTimeout(() => {
+                    const modalContent = eurekaModal.querySelector('div');
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            }
+
+            function hideEurekaModal() {
+                 const modalContent = eurekaModal.querySelector('div');
+                 modalContent.classList.add('scale-95', 'opacity-0');
+                 setTimeout(() => {
+                    eurekaModal.classList.add('hidden');
+                 }, 300);
+            }
+
+            // --- Event Listeners ---
+            nodes.forEach(node => {
+                node.addEventListener('click', () => showAEAModule(node.dataset.unit, node.dataset.title));
+            });
+
+            backToMapBtn.addEventListener('click', showDomainMap);
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.tab));
+            });
+            
+            closeModalBtn.addEventListener('click', hideEurekaModal);
+            eurekaModal.addEventListener('click', (e) => {
+                if(e.target === eurekaModal) hideEurekaModal();
+            });
+
+            // --- Initial Render ---
+            updateProfileUI();
+            updateDomainMapUI();
+        });
+    </script>
+</body>
+</html>
